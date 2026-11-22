@@ -35,7 +35,7 @@ if %errorLevel% equ 0 (
 )
 
 :: 3. Mahalliy inf fayl orqali ro'yxatdan o'tkazish
-echo.
+echo. 
 echo [2/3] Mahalliy drayver kutubxonasi tekshirilmoqda...
 cd /d "%~dp0VirtualDisplayDriver"
 if exist "MttVDD.inf" (

@@ -436,43 +436,62 @@ setInterval(() => {
 // Setup HTTPS Server with self-signed certificate for mobile browser security
 let httpsServer = null;
 let httpsWss = null;
-try {
-    const pems = selfsigned.generate([
-        { name: 'commonName', value: 'PhoneDisplay' }
-    ], { days: 365 });
 
-    httpsServer = https.createServer({ key: pems.private, cert: pems.cert }, app);
-    httpsServer.on('error', (err) => {
-        console.error('⚠️ HTTPS Server error:', err.message);
-    });
+async function startServers() {
+    try {
+        const pems = await selfsigned.generate([
+            { name: 'commonName', value: LOCAL_IP || 'PhoneDisplay' }
+        ], {
+            days: 365,
+            keySize: 2048,
+            algorithm: 'sha256',
+            extensions: [
+                {
+                    name: 'subjectAltName',
+                    altNames: [
+                        { type: 2, value: 'localhost' },
+                        { type: 7, ip: LOCAL_IP },
+                        { type: 7, ip: '127.0.0.1' }
+                    ]
+                }
+            ]
+        });
 
-    httpsWss = new WebSocket.Server({ server: httpsServer });
-    httpsWss.on('error', (err) => {
-        console.error('⚠️ HTTPS WSS error:', err.message);
-    });
-    httpsWss.on('connection', handleWebSocketConnection);
+        httpsServer = https.createServer({ key: pems.private, cert: pems.cert }, app);
+        httpsServer.on('error', (err) => {
+            console.error('⚠️ HTTPS Server error:', err.message);
+        });
 
-    httpsServer.listen(HTTPS_PORT, '0.0.0.0', () => {
-        console.log(`🔒 HTTPS Xavfsiz Manzil (Kamera va Ekran uchun): ${PHONE_HTTPS_URL}`);
+        httpsWss = new WebSocket.Server({ server: httpsServer });
+        httpsWss.on('error', (err) => {
+            console.error('⚠️ HTTPS WSS error:', err.message);
+        });
+        httpsWss.on('connection', handleWebSocketConnection);
+
+        httpsServer.listen(HTTPS_PORT, '0.0.0.0', () => {
+            console.log(`🔒 HTTPS Xavfsiz Manzil (Kamera va Ekran uchun): ${PHONE_HTTPS_URL}`);
+        });
+    } catch (e) {
+        console.log('HTTPS initialize skipped:', e.message);
+    }
+
+    // Start HTTP and WebSocket Server
+    server.listen(PORT, '0.0.0.0', async () => {
+        console.log('\n======================================================');
+        console.log('   🚀 PhoneDisplay Pro - Ikkinchi Ekran Dasturi');
+        console.log('======================================================');
+        console.log(`🌐 Kompyuter Boshqaruv Paneli (Host): http://localhost:${PORT}/host`);
+        console.log(`📱 Telefoningizda oching:           ${PHONE_URL}`);
+        console.log(`🔒 HTTPS Xavfsiz Manzil:            ${PHONE_HTTPS_URL}`);
+        console.log('======================================================\n');
+
+        QRCode.toString(PHONE_URL, { type: 'terminal', small: true }, (err, qr) => {
+            if (!err) {
+                console.log('📱 Telefon kamerasi bilan quyidagi QR-kodni skanerlang:\n');
+                console.log(qr);
+            }
+        });
     });
-} catch (e) {
-    console.log('HTTPS initialize skipped:', e.message);
 }
 
-// Start HTTP and WebSocket Server
-server.listen(PORT, '0.0.0.0', async () => {
-    console.log('\n======================================================');
-    console.log('   🚀 PhoneDisplay Pro - Ikkinchi Ekran Dasturi');
-    console.log('======================================================');
-    console.log(`🌐 Kompyuter Boshqaruv Paneli (Host): http://localhost:${PORT}/host`);
-    console.log(`📱 Telefoningizda oching:           ${PHONE_URL}`);
-    console.log(`🔒 HTTPS Xavfsiz Manzil:            ${PHONE_HTTPS_URL}`);
-    console.log('======================================================\n');
-
-    QRCode.toString(PHONE_URL, { type: 'terminal', small: true }, (err, qr) => {
-        if (!err) {
-            console.log('📱 Telefon kamerasi bilan quyidagi QR-kodni skanerlang:\n');
-            console.log(qr);
-        }
-    });
-});
+startServers();
