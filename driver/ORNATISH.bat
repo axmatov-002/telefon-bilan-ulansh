@@ -6,13 +6,16 @@ color 0b
 :: Admin huquqini tekshirish
 net session >nul 2>&1
 if %errorLevel% neq 0 (
-    echo Administrator huquqi bilan qayta ishga tushirilmoqda...
-    powershell -Command "Start-Process cmd -ArgumentList '/c \"%~dp0ORNATISH.bat\"' -Verb RunAs"
+    echo.
+    echo [!] Administrator huquqi talab qilinadi.
+    echo Iltimos, chiqqan UAC darchasida "Ha" (Yes) ni bosing...
+    echo.
+    powershell -NoProfile -Command "Start-Process cmd -ArgumentList '/c `\"%~dp0ORNATISH.bat`\"' -Verb RunAs"
     exit /b
 )
 
 echo ==========================================================
-echo   Virtual Display Driver (2-Ekran) O'rnatilmoqda...
+echo   Virtual Display Driver (2-Mustaqil Ekran) O'rnatilmoqda
 echo ==========================================================
 echo.
 
@@ -20,39 +23,42 @@ echo.
 if not exist "C:\VirtualDisplayDriver" mkdir "C:\VirtualDisplayDriver"
 if exist "%~dp0VirtualDisplayDriver\vdd_settings.xml" (
     copy /y "%~dp0VirtualDisplayDriver\vdd_settings.xml" "C:\VirtualDisplayDriver\vdd_settings.xml" >nul
+    echo [+] Sozlamalar fayli (vdd_settings.xml) tayyorlandi.
 )
 
-:: 2. Winget orqali rasmiy avtomatik o'rnatishni sinash
-echo 1-qadam: Rasmiy drayver paketi o'rnatilmoqda...
+:: 2. Winget orqali rasmiy avtomatik o'rnatish
+echo.
+echo [1/3] Rasmiy Virtual Display Driver o'rnatilmoqda...
 where winget >nul 2>&1
 if %errorLevel% equ 0 (
-    winget install --id=VirtualDrivers.Virtual-Display-Driver -e --accept-source-agreements --accept-package-agreements --silent
+    winget install --id=VirtualDrivers.Virtual-Display-Driver -e --accept-source-agreements --accept-package-agreements
 )
 
-:: 3. Mahalliy inf fayl orqali ham tizimga yuklash (zaxira)
+:: 3. Mahalliy inf fayl orqali ro'yxatdan o'tkazish
+echo.
+echo [2/3] Mahalliy drayver kutubxonasi tekshirilmoqda...
 cd /d "%~dp0VirtualDisplayDriver"
 if exist "MttVDD.inf" (
-    echo 2-qadam: Tizim drayveri ro'yxatdan o'tkazilmoqda...
     pnputil /add-driver MttVDD.inf /install >nul 2>&1
     pnputil /scan-devices >nul 2>&1
 )
 
 :: 4. Windows ekranini avtomatik "Kengaytirish" (Extend) rejimiga o'tkazish
-echo 3-qadam: Ekran kengaytirilmoqda (Extend mode)...
+echo.
+echo [3/3] Windows ekrani "Kengaytirish" (Extend) rejimiga o'tkazilmoqda...
 if exist "C:\Windows\System32\DisplaySwitch.exe" (
     C:\Windows\System32\DisplaySwitch.exe /extend
 )
 
 echo.
 echo ==========================================================
-echo    TAYYOR! Virtual Ikkinchi Ekran faollashtirildi!
+echo     TAYYOR! Virtual Ikkinchi Ekran faollashtirildi!
 echo ==========================================================
 echo.
-echo Endi kompyuteringizda ikkita monitor mavjud!
-echo Brauzerda http://localhost:3000 ochib, "Share Screen" bosganingizda
-echo "Ekran 2" ni tanlang va xohlagan dasturni telefonga o'tkazing!
+echo Endi kompyuteringizda ikkita mustaqil monitor mavjud!
+echo Xohlagan dasturingizni sichqoncha bilan o'ng tomonga (telefon ekraniga) surishingiz mumkin.
 echo.
-echo Ekran sozlamalari ochilmoqda...
+echo Ekran sozlamalari ochilmoqda (Display Settings)...
 start ms-settings:display
 
 echo.

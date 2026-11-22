@@ -107,10 +107,107 @@
                         <button class="btn btn-danger btn-large" id="btnStopStream" style="display: none;">
                             <span class="btn-icon">⏹</span> Uzatishni To'xtatish
                         </button>
+                        <button class="btn btn-secondary btn-large" id="btnToggleAnimGuide" title="Noutbuk va telefon o'rtasida oynani surish animatsiyasini ko'rish">
+                            <span class="btn-icon">🎬</span> Animatsiyali Yo'riqnoma
+                        </button>
                     </div>
                     <p class="stream-hint">
-                        💡 <b>Tavsiya:</b> "Share Screen" bosilganda ochilgan oynadan <b>"Ikkinchi Ekran"</b> (Virtual Display) yoki kerakli dasturni (masalan: VS Code, Telegram, Browser) tanlang.
+                        💡 <b>Mustaqil 2-ekran siri:</b> "Share Screen" bosilganda ochilgan oynadan <b>"Oyna" (Window)</b> bo'limini tanlab faqat kerakli dasturni telefonga uzatishingiz yoki <b>"Virtual 2-Ekran"</b> tanlab oynalarni o'ngga surishingiz mumkin!
                     </p>
+                </div>
+
+                <!-- Animated Interactive Visual Guide -->
+                <div id="animGuideBox" class="anim-guide-container" style="display: none;">
+                    <div class="anim-guide-header">
+                        <div class="guide-title">
+                            <span class="live-dot"></span>
+                            <h4>🎬 Jonli Animatsiya: Oynani noutbukdan telefonga surish</h4>
+                        </div>
+                        <div class="guide-actions">
+                            <button class="btn btn-small btn-primary" id="btnHostPlayAnim">▶ Qayta Ijro Etish</button>
+                            <button class="btn btn-small btn-secondary" id="btnCloseAnimGuide">✕ Yopish</button>
+                        </div>
+                    </div>
+
+                    <div class="anim-stage">
+                        <!-- Laptop Mockup -->
+                        <div class="mockup-laptop">
+                            <div class="mockup-header">
+                                <div class="dots"><span></span><span></span><span></span></div>
+                                <span class="mockup-title">💻 Noutbuk (Display 1 - Asosiy ish)</span>
+                                <span class="mockup-res">1920x1080</span>
+                            </div>
+                            <div class="mockup-content">
+                                <div class="code-line green">// 1. Noutbukda o'z ishingiz bilan mashg'ul bo'lasiz:</div>
+                                <div class="code-line blue"><span class="purple">function</span> <span class="yellow">doWorkOnLaptop</span>() {</div>
+                                <div class="code-line text-indent">writeMainCodeAndDocs();</div>
+                                <div class="code-line text-indent cyan">console.<span class="yellow">log</span>(<span class="amber">"Asosiy ekran band emas!"</span>);</div>
+                                <div class="code-line blue">} <span class="typing-cursor"></span></div>
+                            </div>
+                            <div class="mockup-taskbar">
+                                <span>🪟 Start</span>
+                                <span class="taskbar-time">18:45</span>
+                            </div>
+                        </div>
+
+                        <!-- Direction Arrow -->
+                        <div class="drag-indicator">
+                            <span class="arrow-icon">➔</span>
+                            <span class="arrow-text">O'ngga<br>surish</span>
+                        </div>
+
+                        <!-- Phone Mockup -->
+                        <div class="mockup-phone" id="hostMockupPhone">
+                            <div class="phone-notch">
+                                <span>18:45</span>
+                                <div class="notch-island"></div>
+                                <span>📶 5G</span>
+                            </div>
+                            <div class="phone-screen-body" id="hostPhoneScreenBody">
+                                <div class="phone-idle-state" id="hostPhoneIdleState">
+                                    <div class="phone-icon">📱</div>
+                                    <div class="phone-text">Display 2</div>
+                                    <div class="phone-subtext">Dasturni bu yerga suring</div>
+                                </div>
+                            </div>
+                            <div class="phone-home-bar"></div>
+                        </div>
+
+                        <!-- Movable Window -->
+                        <div class="floating-app-window" id="hostFloatingWindow">
+                            <div class="floating-window-header">
+                                <span>📺 YouTube / Telegram</span>
+                                <div class="window-btns"><span>_</span><span>□</span><span>✕</span></div>
+                            </div>
+                            <div class="floating-window-body">
+                                <div class="mini-player">
+                                    <span class="play-btn-triangle">▶</span>
+                                    <div class="sound-wave">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                </div>
+                                <div class="window-footer-text">
+                                    <span>2-Mustaqil Dastur</span>
+                                    <span class="live-pill">LIVE</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Virtual Cursor -->
+                        <div class="virtual-cursor-pointer" id="hostVirtualCursor">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M4 3L18 14L11 15L8 21L4 3Z" fill="#00f0ff" stroke="#000" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="anim-status-bar" id="hostAnimStatus">
+                        <span class="status-icon">💡</span>
+                        <div class="status-text-wrap">
+                            <b id="hostAnimTitle">Oynani o'ngga surish:</b>
+                            <span id="hostAnimSubtitle">Dastur oynasini sichqoncha bilan tutib, kompyuter ekranidan o'ng tomonga (telefoningizga) o'tkazasiz.</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Display Settings & Quality -->

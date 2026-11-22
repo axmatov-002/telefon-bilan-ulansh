@@ -608,6 +608,92 @@ btnAudioPhone.addEventListener('click', () => {
 btnStartStream.addEventListener('click', startScreenStream);
 btnStopStream.addEventListener('click', stopScreenStream);
 
+// =========================================================
+// ANIMATED DUAL SCREEN INTERACTIVE GUIDE CONTROLLER
+// =========================================================
+const btnToggleAnimGuide = document.getElementById('btnToggleAnimGuide');
+const btnCloseAnimGuide = document.getElementById('btnCloseAnimGuide');
+const btnHostPlayAnim = document.getElementById('btnHostPlayAnim');
+const animGuideBox = document.getElementById('animGuideBox');
+const hostFloatingWindow = document.getElementById('hostFloatingWindow');
+const hostVirtualCursor = document.getElementById('hostVirtualCursor');
+const hostMockupPhone = document.getElementById('hostMockupPhone');
+const hostPhoneScreenBody = document.getElementById('hostPhoneScreenBody');
+const hostPhoneIdleState = document.getElementById('hostPhoneIdleState');
+const hostAnimTitle = document.getElementById('hostAnimTitle');
+const hostAnimSubtitle = document.getElementById('hostAnimSubtitle');
+
+let hostAnimRunning = false;
+
+function runHostAnimation() {
+    if (hostAnimRunning) return;
+    hostAnimRunning = true;
+    btnHostPlayAnim.innerText = 'Surilmoqda...';
+
+    // Reset initial state
+    hostFloatingWindow.style.transform = 'translate(0px, 0px) scale(1)';
+    hostVirtualCursor.style.opacity = '0';
+    hostPhoneIdleState.style.display = 'block';
+    hostPhoneScreenBody.style.borderColor = '#334155';
+    hostPhoneScreenBody.style.background = '#020617';
+
+    hostAnimTitle.innerText = '1. Sichqoncha dastur sarlavhasini tutdi';
+    hostAnimSubtitle.innerText = 'Oynani bosib turib, kompyuter ekranidan o\'ng tomonga (telefon monitoriga) qarab suramiz...';
+
+    // Step 1: Cursor appears
+    setTimeout(() => {
+        hostVirtualCursor.style.opacity = '1';
+        hostVirtualCursor.style.left = '60px';
+        hostVirtualCursor.style.top = '45px';
+    }, 400);
+
+    // Step 2: Drag across to phone
+    setTimeout(() => {
+        const stage = document.querySelector('.anim-stage');
+        const stageWidth = stage ? stage.clientWidth : 500;
+        const dragDistanceX = stageWidth - 210;
+
+        hostFloatingWindow.style.transform = `translate(${dragDistanceX}px, 20px) scale(0.68)`;
+        hostFloatingWindow.style.boxShadow = '0 0 25px rgba(59, 130, 246, 0.8)';
+
+        hostVirtualCursor.style.left = (dragDistanceX + 50) + 'px';
+        hostVirtualCursor.style.top = '65px';
+
+        hostPhoneScreenBody.style.borderColor = '#38bdf8';
+        hostPhoneScreenBody.style.background = 'rgba(14, 165, 233, 0.15)';
+    }, 1100);
+
+    // Step 3: Landed on phone
+    setTimeout(() => {
+        hostVirtualCursor.style.opacity = '0';
+        hostPhoneIdleState.style.display = 'none';
+        hostAnimTitle.innerText = '✅ Tayyor! Ikkala dastur alohida ishlamoqda:';
+        hostAnimSubtitle.innerText = 'Noutbukda kod yoki asosiy ish davom etyapti, telefonda esa video mustaqil ravishda ishlab turibdi!';
+        btnHostPlayAnim.innerText = '▶ Qayta Ijro Etish';
+        hostAnimRunning = false;
+    }, 2500);
+}
+
+if (btnToggleAnimGuide) {
+    btnToggleAnimGuide.addEventListener('click', () => {
+        const isHidden = animGuideBox.style.display === 'none';
+        animGuideBox.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) {
+            runHostAnimation();
+        }
+    });
+}
+
+if (btnCloseAnimGuide) {
+    btnCloseAnimGuide.addEventListener('click', () => {
+        animGuideBox.style.display = 'none';
+    });
+}
+
+if (btnHostPlayAnim) {
+    btnHostPlayAnim.addEventListener('click', runHostAnimation);
+}
+
 // Initialize
 fetchServerInfo();
 initWebSocket();
