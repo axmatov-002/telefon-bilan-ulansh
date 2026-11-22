@@ -747,5 +747,115 @@ touchOverlay.addEventListener('touchend', (e) => {
     }
 }, { passive: false });
 
+// =========================================================
+// MOBILE CLIENT ANIMATED GUIDE & MODAL CONTROLLER
+// =========================================================
+const btnClientPlayAnim = document.getElementById('btnClientPlayAnim');
+const clientMiniWindow = document.getElementById('clientMiniWindow');
+const clientMiniCursor = document.getElementById('clientMiniCursor');
+const clientMiniPhone = document.getElementById('clientMiniPhone');
+const clientMiniPhoneScreen = document.getElementById('clientMiniPhoneScreen');
+const clientMiniPhoneIdle = document.getElementById('clientMiniPhoneIdle');
+const clientAnimDesc = document.getElementById('clientAnimDesc');
+
+const btnOpenMobileGuide = document.getElementById('btnOpenMobileGuide');
+const btnCloseMobileGuide = document.getElementById('btnCloseMobileGuide');
+const btnModalUnderstood = document.getElementById('btnModalUnderstood');
+const mobileGuideModal = document.getElementById('mobileGuideModal');
+
+let isClientAnimRunning = false;
+
+function runClientMiniAnimation() {
+    if (isClientAnimRunning || !clientMiniWindow) return;
+    isClientAnimRunning = true;
+    if (btnClientPlayAnim) btnClientPlayAnim.innerText = 'Surilmoqda...';
+
+    // Reset initial positions
+    clientMiniWindow.style.transform = 'translate(0px, 0px) scale(1)';
+    clientMiniCursor.style.opacity = '0';
+    if (clientMiniPhoneIdle) clientMiniPhoneIdle.style.display = 'block';
+    if (clientMiniPhoneScreen) {
+        clientMiniPhoneScreen.style.borderColor = '#334155';
+        clientMiniPhoneScreen.style.background = '#020617';
+    }
+
+    if (clientAnimDesc) {
+        clientAnimDesc.innerHTML = '💡 <b>1-qadam:</b> Noutbukda dastur oynasi sichqoncha bilan ushlandi...';
+    }
+
+    // Step 1: Cursor appears
+    setTimeout(() => {
+        clientMiniCursor.style.opacity = '1';
+        clientMiniCursor.style.left = '35px';
+        clientMiniCursor.style.top = '30px';
+    }, 400);
+
+    // Step 2: Drag window to phone
+    setTimeout(() => {
+        const stage = document.querySelector('.client-anim-stage');
+        const stageWidth = stage ? stage.clientWidth : 280;
+        const dragDist = stageWidth - 110;
+
+        clientMiniWindow.style.transform = `translate(${dragDist}px, 6px) scale(0.68)`;
+        clientMiniWindow.style.boxShadow = '0 0 16px rgba(0, 240, 255, 0.7)';
+
+        clientMiniCursor.style.left = (dragDist + 30) + 'px';
+        clientMiniCursor.style.top = '45px';
+
+        if (clientMiniPhoneScreen) {
+            clientMiniPhoneScreen.style.borderColor = '#00f0ff';
+            clientMiniPhoneScreen.style.background = 'rgba(0, 240, 255, 0.15)';
+        }
+    }, 1100);
+
+    // Step 3: Landed on phone
+    setTimeout(() => {
+        clientMiniCursor.style.opacity = '0';
+        if (clientMiniPhoneIdle) clientMiniPhoneIdle.style.display = 'none';
+        if (clientAnimDesc) {
+            clientAnimDesc.innerHTML = '✅ <b>Tayyor!</b> Oyna telefonda mustaqil ishlamoqda, kompyuterda esa asosiy ish davom etyapti!';
+        }
+        if (btnClientPlayAnim) btnClientPlayAnim.innerText = '▶ Qayta';
+        isClientAnimRunning = false;
+    }, 2500);
+}
+
+if (btnClientPlayAnim) {
+    btnClientPlayAnim.addEventListener('click', (e) => {
+        e.stopPropagation();
+        runClientMiniAnimation();
+    });
+}
+
+// Modal open / close
+if (btnOpenMobileGuide) {
+    btnOpenMobileGuide.addEventListener('click', () => {
+        if (mobileGuideModal) mobileGuideModal.style.display = 'flex';
+    });
+}
+
+if (btnCloseMobileGuide) {
+    btnCloseMobileGuide.addEventListener('click', () => {
+        if (mobileGuideModal) mobileGuideModal.style.display = 'none';
+    });
+}
+
+if (btnModalUnderstood) {
+    btnModalUnderstood.addEventListener('click', () => {
+        if (mobileGuideModal) mobileGuideModal.style.display = 'none';
+    });
+}
+
+if (mobileGuideModal) {
+    mobileGuideModal.addEventListener('click', (e) => {
+        if (e.target === mobileGuideModal) {
+            mobileGuideModal.style.display = 'none';
+        }
+    });
+}
+
+// Auto-run animation after 1.2s on mobile initial load
+setTimeout(runClientMiniAnimation, 1200);
+
 // Initialize
 initWebSocket();

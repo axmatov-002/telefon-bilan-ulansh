@@ -28,6 +28,9 @@
             <button class="client-tab-btn" id="btnModePhoneToPc">
                 <span>📱 Tel ➔ PC (Kast)</span>
             </button>
+            <button class="client-tab-btn guide-pill-btn" id="btnOpenMobileGuide" title="Animatsiyali Yo'riqnoma">
+                <span>🎬 Yo'riqnoma</span>
+            </button>
         </div>
 
         <!-- ============================================== -->
@@ -62,6 +65,61 @@
                     <button class="btn-action primary btn-glow" id="btnRequestScreenFromPC">
                         <span class="icon">🔔</span> Kompyuterdan Ekranni Olish
                     </button>
+
+                    <!-- Interactive Animated Dual Screen Demo on Mobile -->
+                    <div class="client-anim-box">
+                        <div class="client-anim-header">
+                            <div class="anim-header-left">
+                                <span class="live-dot-mini"></span>
+                                <span class="client-anim-title">🎬 2-Ekran qanday ishlaydi?</span>
+                            </div>
+                            <button id="btnClientPlayAnim" class="btn-anim-play" type="button">▶ Ko'rish</button>
+                        </div>
+                        
+                        <div class="client-anim-stage">
+                            <!-- Laptop Mini Mockup -->
+                            <div class="mini-laptop">
+                                <div class="mini-laptop-screen">
+                                    <div class="mini-code-line">// Noutbuk (Asosiy ish)</div>
+                                    <div class="mini-code-sub">function main() { ... }</div>
+                                </div>
+                                <div class="mini-laptop-base"></div>
+                            </div>
+
+                            <!-- Drag Arrow -->
+                            <div class="mini-arrow-wrap">
+                                <span class="mini-arrow">➔</span>
+                                <span class="mini-arrow-sub">Surish</span>
+                            </div>
+
+                            <!-- Phone Mini Mockup -->
+                            <div class="mini-phone" id="clientMiniPhone">
+                                <div class="mini-phone-notch"></div>
+                                <div class="mini-phone-screen" id="clientMiniPhoneScreen">
+                                    <span id="clientMiniPhoneIdle">📱 Tel</span>
+                                </div>
+                            </div>
+
+                            <!-- Mini App Window that animates from laptop to phone -->
+                            <div class="mini-anim-window" id="clientMiniWindow">
+                                <div class="mini-window-bar">📺 Oyna</div>
+                                <div class="mini-window-content">
+                                    <span class="mini-play-icon">▶</span>
+                                </div>
+                            </div>
+
+                            <!-- Mini Virtual Cursor -->
+                            <div class="mini-cursor" id="clientMiniCursor">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 3L18 14L11 15L8 21L4 3Z" fill="#00f0ff" stroke="#000" stroke-width="1.5"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="client-anim-desc" id="clientAnimDesc">
+                            💡 <b>Oynani surish:</b> Kompyuterdagi ikkinchi dasturni o'ngga surasiz — u to'g'ridan-to'g'ri telefoningizda mustaqil ishlaydi!
+                        </div>
+                    </div>
 
                     <!-- Live Direct Mouse Touchpad Zone right inside waiting screen -->
                     <div class="waiting-touchpad-box">
@@ -291,6 +349,40 @@
                     <div class="cast-tips">
                         💡 <b>Eslatma:</b> Android telefonlarda "Boshlash" tugmasi bosilganda tizim xavfsizlik ruxsatini so'raydi. Unga <b>"Boshlash / Ruxsat berish"</b> ni bosing.
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Interactive Animated Guide Modal -->
+        <div id="mobileGuideModal" class="guide-modal-backdrop" style="display: none;">
+            <div class="guide-modal-card">
+                <div class="guide-modal-header">
+                    <div class="guide-modal-title">
+                        <span class="live-dot-mini"></span>
+                        <h3>🎬 2-Ekran Yo'riqnomasi</h3>
+                    </div>
+                    <button id="btnCloseMobileGuide" class="btn-icon-close" type="button">✕</button>
+                </div>
+                <div class="guide-modal-body">
+                    <p class="guide-lead-text">
+                        Kompyuteringizda asosiy ishni qilib, telefoningizda esa alohida ikkinchi dasturni (Telegram, YouTube, Video) ko'rishning 2 xil yo'li bor:
+                    </p>
+
+                    <div class="method-card green-border">
+                        <div class="method-badge">🌟 1-USUL: Dastur oynasini uzatish (Drayversiz)</div>
+                        <p>Kompyuterda "Share Screen" bosilganda tepada <b>"Oyna" (Window)</b> bo'limidan faqat kerakli dasturni (masalan Telegram yoki YouTube) tanlang.</p>
+                        <small>✅ Noutbukingizda asosiy ishingiz qolaveradi, telefonda faqat o'sha oyna ko'rinadi!</small>
+                    </div>
+
+                    <div class="method-card blue-border">
+                        <div class="method-badge">🚀 2-USUL: Haqiqiy 2-Monitor (Extend)</div>
+                        <p>Kompyuterda <code>driver/ORNATISH.bat</code> orqali drayver o'rnatiladi va <code>Win + P</code> -> <b>"Kengaytirish" (Extend)</b> tanlanadi.</p>
+                        <small>✅ Oynalarni noutbuk ekranidan o'ng tomonga (telefoningizga) surib o'tkazasiz!</small>
+                    </div>
+
+                    <button class="btn-action primary" id="btnModalUnderstood" type="button">
+                        Tushunarli, Rahmat!
+                    </button>
                 </div>
             </div>
         </div>
