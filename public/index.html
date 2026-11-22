@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0c0f17">
+    <link rel="manifest" href="/manifest.json">
+    <title>PhoneDisplay Pro - Ikki Tomonlama Ekran</title>
+    <link rel="stylesheet" href="/css/client.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="display-container">
+        
+        <!-- Top Mode Selector Bar -->
+        <div class="client-top-bar" id="clientTopBar">
+            <button class="client-tab-btn active" id="btnModePcToPhone">
+                <span>🖥️ 2-Ekran (PC ➔ Tel)</span>
+            </button>
+            <button class="client-tab-btn" id="btnModeRemote">
+                <span>🎮 Pult & Trekpad</span>
+            </button>
+            <button class="client-tab-btn" id="btnModePhoneToPc">
+                <span>📱 Tel ➔ PC (Kast)</span>
+            </button>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW 1: PC -> Phone (Extended Second Monitor) -->
+        <!-- ============================================== -->
+        <div id="viewPcToPhone" class="client-view active">
+            <!-- Main Video Canvas / Stream -->
+            <div id="videoContainer" class="video-container fit-contain">
+                <video id="remoteVideo" autoplay playsinline muted></video>
+                
+                <!-- Touch Overlay layer to capture all touch gestures -->
+                <div id="touchOverlay" class="touch-overlay"></div>
+
+                <!-- Virtual Cursor for Trackpad Mode -->
+                <div id="virtualCursor" class="virtual-cursor" style="display: none;"></div>
+            </div>
+
+            <!-- Non-blocking Direct Connect / Waiting Card -->
+            <div id="waitingScreen" class="waiting-screen">
+                <div class="waiting-card">
+                    <div class="connection-header-badge">
+                        <span class="status-dot-pulse"></span>
+                        <span id="connectionBadgeText">Kompyuterga Bevosita Bog'landi</span>
+                    </div>
+
+                    <h2 id="connectionTitle">Ekran Signali Kutilmoqda</h2>
+                    <p id="connectionStatusText">
+                        Kompyuter boshqaruv panelida ekranni tanlang yoki quyidagi tugma orqali ekranni so'rang:
+                    </p>
+
+                    <!-- Request Screen Button -->
+                    <button class="btn-action primary btn-glow" id="btnRequestScreenFromPC">
+                        <span class="icon">🔔</span> Kompyuterdan Ekranni Olish
+                    </button>
+
+                    <!-- Live Direct Mouse Touchpad Zone right inside waiting screen -->
+                    <div class="waiting-touchpad-box">
+                        <div class="touchpad-hint">
+                            <span>🖱️ Kompyuterni bevosita boshqarish (Trekpad):</span>
+                        </div>
+                        <div id="waitingTouchpad" class="waiting-touchpad-surface">
+                            <span class="touchpad-watermark">Bu yerda surib sichqonchani harakatlantiring</span>
+                        </div>
+                        <div class="waiting-mouse-btns">
+                            <button class="mouse-btn" id="btnWaitLeftClick">🖱️ Chap Tugma</button>
+                            <button class="mouse-btn" id="btnWaitRightClick">🖱️ O'ng Tugma</button>
+                        </div>
+                    </div>
+
+                    <!-- Quick System Hotkeys -->
+                    <div class="waiting-quick-keys">
+                        <button class="mini-key-btn" data-hotkey="START">⊞ Start</button>
+                        <button class="mini-key-btn" data-hotkey="WIN_D">🗔 Desktop</button>
+                        <button class="mini-key-btn" data-hotkey="ALT_TAB">📑 Alt+Tab</button>
+                        <button class="mini-key-btn" id="btnWaitKeyboard">⌨️ Klaviatura</button>
+                    </div>
+
+                    <div class="waiting-info">
+                        <span>Holat: <b id="connectionStateText">Faol</b></span>
+                        <span id="pingBadge">Ping: -- ms</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Action Menu Button -->
+            <button id="btnToggleMenu" class="floating-btn menu-toggle" aria-label="Menyu">
+                ⚙️
+            </button>
+
+            <!-- Floating Controls Toolbar -->
+            <div id="controlsToolbar" class="controls-toolbar collapsed">
+                <div class="toolbar-header">
+                    <span class="toolbar-title">PhoneDisplay Pro</span>
+                    <span id="liveStatsBadge" class="stats-badge">60 FPS • 8ms</span>
+                    <button id="btnCloseToolbar" class="btn-icon-close">✕</button>
+                </div>
+
+                <div class="toolbar-buttons-grid">
+                    <button id="btnFullscreen" class="toolbar-btn">
+                        <span class="icon">⛶</span>
+                        <span>To'liq Ekran</span>
+                    </button>
+                    <button id="btnOpenKeyboard" class="toolbar-btn">
+                        <span class="icon">⌨️</span>
+                        <span>Klaviatura</span>
+                    </button>
+                    <button id="btnToggleTouchMode" class="toolbar-btn">
+                        <span class="icon">👆</span>
+                        <span id="touchModeLabel">Sensor (Direct)</span>
+                    </button>
+                    <button id="btnFitMode" class="toolbar-btn">
+                        <span class="icon">📐</span>
+                        <span id="fitModeLabel">Moslash: Fit</span>
+                    </button>
+                </div>
+
+                <!-- Quick Action Keys for Windows -->
+                <div class="quick-keys-section">
+                    <div class="quick-keys-title">Tezkor Tugmalar:</div>
+                    <div class="quick-keys-row">
+                        <button class="key-btn" data-key="{ESC}">ESC</button>
+                        <button class="key-btn" data-key="^{ESC}">WIN</button>
+                        <button class="key-btn" data-key="%{TAB}">ALT+TAB</button>
+                        <button class="key-btn" data-key="^c">CTRL+C</button>
+                        <button class="key-btn" data-key="^v">CTRL+V</button>
+                        <button class="key-btn" data-key="{ENTER}">ENTER</button>
+                        <button class="key-btn" data-key="{BS}">BACKSPACE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW 2: DEDICATED REMOTE CONTROLLER & TRACKPAD -->
+        <!-- ============================================== -->
+        <div id="viewRemote" class="client-view" style="display: none;">
+            <div class="remote-panel-container">
+                <!-- Top Header & Sensitivity -->
+                <div class="remote-top-bar">
+                    <div class="remote-status">
+                        <span class="status-dot-pulse"></span>
+                        <span>PC Boshqaruvi</span>
+                    </div>
+                    <div class="sensitivity-control">
+                        <label>Tezlik:</label>
+                        <select id="remoteSensitivitySelect">
+                            <option value="1.0">1.0x (Oddiy)</option>
+                            <option value="1.5" selected>1.5x (Tezkor)</option>
+                            <option value="2.0">2.0x (Geymer)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Large Glassmorphic Trackpad -->
+                <div id="dedicatedTrackpad" class="dedicated-trackpad">
+                    <div class="trackpad-inner-content">
+                        <span class="trackpad-icon">🖱️</span>
+                        <p>Simsiz Trekpad Maydoni</p>
+                        <small>1 barmoq = Ko'chirish • Bosish = Click • 2 barmoq = Scroll</small>
+                    </div>
+                </div>
+
+                <!-- Mouse Left & Right Click Buttons -->
+                <div class="trackpad-click-buttons">
+                    <button id="btnDedicatedLeftClick" class="mouse-click-btn primary">
+                        <span>🖱️ CHAP TUGMA (CLICK)</span>
+                    </button>
+                    <button id="btnDedicatedRightClick" class="mouse-click-btn secondary">
+                        <span>O'NG TUGMA</span>
+                    </button>
+                </div>
+
+                <!-- Windows Hotkeys Grid -->
+                <div class="remote-section-title">🖥️ Windows Tizim Tugmalari</div>
+                <div class="remote-grid-buttons">
+                    <button class="remote-btn" data-hotkey="START">
+                        <span class="icon">⊞</span>
+                        <span>Start</span>
+                    </button>
+                    <button class="remote-btn" data-hotkey="WIN_D">
+                        <span class="icon">🗔</span>
+                        <span>Desktop</span>
+                    </button>
+                    <button class="remote-btn" data-hotkey="ALT_TAB">
+                        <span class="icon">📑</span>
+                        <span>Alt+Tab</span>
+                    </button>
+                    <button class="remote-btn" data-hotkey="TASK_MGR">
+                        <span class="icon">🗂️</span>
+                        <span>Task Mgr</span>
+                    </button>
+                    <button class="remote-btn" data-hotkey="WIN_E">
+                        <span class="icon">📁</span>
+                        <span>Explorer</span>
+                    </button>
+                    <button class="remote-btn danger" data-hotkey="ALT_F4">
+                        <span class="icon">✕</span>
+                        <span>Alt+F4</span>
+                    </button>
+                    <button class="remote-btn lock" data-hotkey="LOCK">
+                        <span class="icon">🔒</span>
+                        <span>Qulflash</span>
+                    </button>
+                    <button class="remote-btn" data-hotkey="ESC">
+                        <span class="icon">⎋</span>
+                        <span>ESC</span>
+                    </button>
+                </div>
+
+                <!-- Media & Volume Controls -->
+                <div class="remote-section-title">🔊 Multimedia & Ovoz</div>
+                <div class="media-controls-row">
+                    <button class="media-btn" data-hotkey="MUTE" title="Ovozni o'chirish">🔇</button>
+                    <button class="media-btn" data-hotkey="VOL_DOWN" title="Ovozni pasaytirish">🔉-</button>
+                    <button class="media-btn" data-hotkey="VOL_UP" title="Ovozni ko'tarish">🔊+</button>
+                    <button class="media-btn" data-hotkey="PREV_TRACK" title="Oldingi">⏮️</button>
+                    <button class="media-btn primary" data-hotkey="PLAY_PAUSE" title="Play/Pause">⏯️</button>
+                    <button class="media-btn" data-hotkey="NEXT_TRACK" title="Keyingi">⏭️</button>
+                </div>
+
+                <!-- Text Typing Box to PC -->
+                <div class="remote-section-title">⌨️ Kompyuterga Matn Kiritish</div>
+                <div class="text-sender-box">
+                    <input type="text" id="pcTextInput" placeholder="Matn yozing (masalan: salom)..." autocomplete="off">
+                    <button id="btnSendTextToPc" class="btn-send-text">Yuborish ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW 3: Phone -> PC (Phone Screen Mirroring)  -->
+        <!-- ============================================== -->
+        <div id="viewPhoneToPc" class="client-view" style="display: none;">
+            <div class="cast-container">
+                <div class="cast-card">
+                    <div class="cast-icon">📲 ➔ 🖥️</div>
+                    <h2>Telefon Ekranini Kompyuterga Chiqarish</h2>
+                    
+                    <div class="mode-guidance-card">
+                        <div class="guidance-icon">💡</div>
+                        <div class="guidance-text">
+                            <strong>Kompyuterni telefonga ikkinchi ekran qilmoqchimisiz?</strong>
+                            <p>Agar kompyuter ekranini telefonda ko'rmoqchi bo'lsangiz, yuqoridagi <b>"🖥️ 2-Ekran (PC ➔ Tel)"</b> tugmasini bosing!</p>
+                        </div>
+                    </div>
+
+                    <p>
+                        Telefoningizdagi barcha o'yinlar, ilovalar (Telegram, YouTube, Galereya) yoki kamerangizni to'g'ridan-to'g'ri kompyuter monitorida ko'rsating!
+                    </p>
+
+                    <!-- Status Display -->
+                    <div class="cast-status-box" id="castStatusBox">
+                        <span class="status-indicator-dot idle" id="castIndicator"></span>
+                        <span id="castStatusText">Uzatish to'xtatilgan</span>
+                    </div>
+
+                    <!-- Casting Action Buttons -->
+                    <div class="cast-actions-group">
+                        <button class="btn-cast primary" id="btnStartPhoneScreenShare">
+                            <span class="icon">▶</span>
+                            <span>Telefon Ekranini Uzatish (Screen Cast)</span>
+                        </button>
+
+                        <button class="btn-cast secondary" id="btnStartPhoneCameraShare">
+                            <span class="icon">📷</span>
+                            <span>Kamerani Uzatish (Webcam Rejimi)</span>
+                        </button>
+
+                        <button class="btn-cast danger" id="btnStopPhoneShare" style="display: none;">
+                            <span class="icon">⏹</span>
+                            <span>Uzatishni To'xtatish</span>
+                        </button>
+                    </div>
+
+                    <!-- Live Local Preview on Phone -->
+                    <div class="cast-preview-wrapper" id="castPreviewWrapper" style="display: none;">
+                        <span>Uzatilayotgan tasvir:</span>
+                        <video id="phoneLocalPreviewVideo" autoplay playsinline muted></video>
+                    </div>
+
+                    <div class="cast-tips">
+                        💡 <b>Eslatma:</b> Android telefonlarda "Boshlash" tugmasi bosilganda tizim xavfsizlik ruxsatini so'raydi. Unga <b>"Boshlash / Ruxsat berish"</b> ni bosing.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden input field to trigger mobile virtual keyboard -->
+        <input type="text" id="hiddenKeyboardInput" class="hidden-input" autocomplete="off" autocapitalize="off" spellcheck="false">
+    </div>
+
+    <script src="/js/client.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "phonedisplay-pro",
+  "version": "1.0.0",
+  "description": "Telefonni kompyuter uchun ikkinchi ekran qiluvchi dastur (WebRTC 60 FPS, Sensor Touch, C# & PowerShell Native Bridge)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "second-screen",
+    "display-extender",
+    "virtual-monitor",
+    "webrtc",
+    "touchscreen",
+    "windows"
+  ],
+  "author": "PhoneDisplay Pro",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4",
+    "selfsigned": "^5.5.0",
+    "ws": "^8.18.0"
+  }
+}

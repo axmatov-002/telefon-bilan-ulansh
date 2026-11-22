@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhoneDisplay Pro - Ikki Tomonlama Ekran Tizimi</title>
+    <link rel="stylesheet" href="/css/host.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">📱⇄🖥️</div>
+                <div class="logo-text">
+                    <h1>PhoneDisplay <span>Pro</span></h1>
+                    <p>Ikki tomonlama ekran: Telefonni 2-ekran qilish & Telefon ekranini kompyuterga chiqarish</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <a href="/phone" class="btn btn-secondary btn-small" target="_blank" style="text-decoration: none; color: #fff;">📱 Telefon Ko'rinishi</a>
+                <span class="status-badge" id="hostStatusBadge">
+                    <span class="pulse-dot"></span> <span id="hostStatusText">Server Faol</span>
+                </span>
+                <span class="fps-badge" id="fpsBadge">0 FPS</span>
+            </div>
+        </header>
+
+        <!-- Live Alert Banner when phone connects or requests stream -->
+        <div id="phoneAlertBanner" class="phone-alert-banner" style="display: none;">
+            <div class="banner-content">
+                <span class="banner-icon">🔔</span>
+                <div class="banner-text">
+                    <strong id="bannerTitle">Yangi telefon ulandi!</strong>
+                    <p id="bannerSub">Telefoningizga ikkinchi ekranni uzatish uchun tugmani bosing:</p>
+                </div>
+            </div>
+            <div class="banner-actions">
+                <button class="btn btn-primary btn-pulse" id="btnBannerShare">
+                    <span class="btn-icon">▶</span> Ekranni Telefonga Uzatish
+                </button>
+                <button class="btn btn-secondary btn-icon-only" id="btnCloseBanner" title="Yopish">✕</button>
+            </div>
+        </div>
+
+        <!-- Mode Switcher Tabs -->
+        <nav class="mode-tabs">
+            <button class="mode-tab-btn active" id="tabPcToPhone" data-mode="pc_to_phone">
+                <span class="tab-icon">🖥️ ➔ 📱</span>
+                <span class="tab-label">1. Kompyuter Ekrani ➔ Telefonga (Ikkinchi Ekran)</span>
+            </button>
+            <button class="mode-tab-btn" id="tabPhoneToPc" data-mode="phone_to_pc">
+                <span class="tab-icon">📱 ➔ 🖥️</span>
+                <span class="tab-label">2. Telefon Ekrani ➔ Kompyuterga (Phone Mirroring)</span>
+                <span class="badge-pulse" id="phoneCastingBadge" style="display: none;">LIVE</span>
+            </button>
+        </nav>
+
+        <!-- Main Grid -->
+        <main class="dashboard-grid">
+            <!-- Left Card: Connection & QR Code (Always Visible) -->
+            <section class="card connection-card">
+                <div class="card-header">
+                    <h2>📲 Telefondan Ulanish</h2>
+                    <span class="badge blue">Wi-Fi / LAN</span>
+                </div>
+                <div class="qr-container">
+                    <div class="qr-wrapper" id="qrWrapper">
+                        <img id="qrCodeImg" src="/api/qr" alt="QR Code">
+                    </div>
+                    <p class="qr-instructions">
+                        1. Telefoningiz kompyuter bilan <b>bir xil Wi-Fi</b> tarmog'ida bo'lsin.<br>
+                        2. Telefon kamerangizni QR-kodga qarating yoki brauzerda quyidagi manzilni oching:
+                    </p>
+                    <div class="url-box">
+                        <input type="text" id="phoneUrlInput" readonly value="Yuklanmoqda...">
+                        <button class="btn btn-secondary" id="btnCopyUrl" title="Manzilni nusxalash">
+                            📋 Nusxa
+                        </button>
+                    </div>
+                </div>
+
+                <div class="connected-clients-section">
+                    <h3>Ulangan Qurilmalar (<span id="clientCount">0</span>)</h3>
+                    <div id="clientsList" class="clients-list">
+                        <div class="empty-clients">Hozircha hech qanday telefon ulanmagan. QR-kodni skanerlang!</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODE 1: PC -> Phone (Extended Second Screen Controller) -->
+            <section class="card stream-card mode-section" id="sectionPcToPhone">
+                <div class="card-header">
+                    <h2>🖥️ Kompyuter Ekranini Telefonga Uzatish</h2>
+                    <span class="badge green" id="streamStateBadge">Tayyor</span>
+                </div>
+
+                <!-- Screen Selection & Action -->
+                <div class="stream-controls">
+                    <div class="control-row">
+                        <button class="btn btn-primary btn-large" id="btnStartStream">
+                            <span class="btn-icon">▶</span> Ekran Uzatishni Boshlash (Share Screen)
+                        </button>
+                        <button class="btn btn-danger btn-large" id="btnStopStream" style="display: none;">
+                            <span class="btn-icon">⏹</span> Uzatishni To'xtatish
+                        </button>
+                    </div>
+                    <p class="stream-hint">
+                        💡 <b>Tavsiya:</b> "Share Screen" bosilganda ochilgan oynadan <b>"Ikkinchi Ekran"</b> (Virtual Display) yoki kerakli dasturni (masalan: VS Code, Telegram, Browser) tanlang.
+                    </p>
+                </div>
+
+                <!-- Display Settings & Quality -->
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="fpsSelect">Kadrlar Tezligi (FPS):</label>
+                        <select id="fpsSelect">
+                            <option value="60" selected>60 FPS (Ultra Silliq)</option>
+                            <option value="30">30 FPS (Standart / Tejamkor)</option>
+                            <option value="120">120 FPS (Gamer / Flagship telefonlar)</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-item">
+                        <label for="resolutionSelect">Ruxsat (Resolution):</label>
+                        <select id="resolutionSelect">
+                            <option value="1080" selected>Full HD (1920x1080)</option>
+                            <option value="720">HD (1280x720) - Eng past kechikish</option>
+                            <option value="original">Original (O'zgartirishsiz)</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-item">
+                        <label for="audioToggle">Ovoz uzatish (Audio):</label>
+                        <select id="audioToggle">
+                            <option value="false" selected>O'chiq (Faqat Tasvir)</option>
+                            <option value="true">Yoqilgan (Kompyuter ovozi telefonda)</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Touch / Sensor boshqaruvi:</label>
+                        <div class="touch-status">
+                            <span class="dot-active"></span> Faol (Sensor -> Windows Sichqonchasi)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Preview -->
+                <div class="preview-container">
+                    <div class="preview-header">
+                        <span>Jonli Ko'rinish (Host Monitor)</span>
+                        <span id="previewStats">Kechikish: ~5-12 ms</span>
+                    </div>
+                    <div class="video-wrapper">
+                        <video id="hostVideoPreview" autoplay playsinline muted></video>
+                        <div class="video-placeholder" id="videoPlaceholder">
+                            <div class="placeholder-icon">📺</div>
+                            <p>Ekranni ulashish boshlanganda bu yerda jonli ko'rinish paydo bo'ladi</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODE 2: Phone -> PC (Phone Screen Mirroring Viewer) -->
+            <section class="card mirror-card mode-section" id="sectionPhoneToPc" style="display: none;">
+                <div class="card-header">
+                    <h2>📱 Telefon Ekranini Kompyuterda Ko'rish</h2>
+                    <span class="badge blue" id="phoneMirrorBadge">Signal Kutilmoqda</span>
+                </div>
+
+                <!-- Phone Mirror Viewer Toolbar -->
+                <div class="phone-viewer-toolbar">
+                    <div class="viewer-actions">
+                        <button class="btn btn-secondary btn-small" id="btnRotatePhone" title="Ekran burilishi">
+                            🔄 Burish (Portret / Albom)
+                        </button>
+                        <button class="btn btn-secondary btn-small" id="btnFullscreenPhone" title="To'liq ekran">
+                            ⛶ To'liq Ekran
+                        </button>
+                        <button class="btn btn-secondary btn-small" id="btnSnapshotPhone" title="Skrinshot olish">
+                            📸 Skrinshot (PNG)
+                        </button>
+                        <button class="btn btn-secondary btn-small" id="btnRecordPhone" title="Videoga yozib olish">
+                            ⏺️ <span id="recordLabel">Yozib Olish</span>
+                        </button>
+                        <button class="btn btn-secondary btn-small" id="btnAudioPhone" title="Telefon ovozi">
+                            🔊 Ovoz: Yoqilgan
+                        </button>
+                    </div>
+                    <div class="viewer-status-text" id="phoneFpsText">0 FPS • Kutish rejimi</div>
+                </div>
+
+                <!-- Smartphone Frame & Video Player -->
+                <div class="phone-frame-container" id="phoneFrameContainer">
+                    <div class="smartphone-mockup portrait" id="smartphoneMockup">
+                        <div class="phone-notch"></div>
+                        <video id="phoneMirrorVideo" autoplay playsinline></video>
+                        <div class="phone-placeholder" id="phonePlaceholder">
+                            <div class="phone-placeholder-icon">📱✨</div>
+                            <h3>Telefon Ekrani Kutilmoqda</h3>
+                            <p>
+                                Telefoningizda ochilgan sahifada yuqoridagi <b>"📱 Telefon ➔ PC"</b> bo'limiga o'ting va <b>"▶ Ekran Uzatishni Boshlash"</b> tugmasini bosing!
+                            </p>
+                            <span class="tag">Android (Chrome) yoki iOS (Kamera)</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bottom Card: Windows Virtual Second Monitor Guide -->
+            <section class="card guide-card">
+                <div class="card-header">
+                    <h2>⚙️ Qo'llanma & Foydali Maslahatlar</h2>
+                    <span class="badge purple">Qo'llanma</span>
+                </div>
+                <div class="guide-content">
+                    <div class="guide-step">
+                        <div class="step-num">1</div>
+                        <div class="step-body">
+                            <h4>Kompyuterni telefonga ikkinchi ekran qilish:</h4>
+                            <p>
+                                <code>driver/setup_virtual_display.ps1</code> skripti orqali Windows'da Virtual 2-Ekranni o'rnating va <code>Win + P</code> -> <b>"Kengaytirish" (Extend)</b> ni tanlang. Endi xohlagan dasturni noutbukdan telefoningizga o'tkazasiz!
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="guide-step">
+                        <div class="step-num">2</div>
+                        <div class="step-body">
+                            <h4>Telefon ekranini kompyuterga chiqarish:</h4>
+                            <p>
+                                Telefoningizda <b>"Telefon ➔ PC"</b> tugmasini bosing. Android tizimi <i>"Ekranni uzatishni boshlaysizmi?"</i> deb so'raganda <b>"Boshlash"</b> ni bosing — telefoningizdagi o'yinlar, ilovalar va videolar to'g'ridan-to'g'ri kompyuter monitorida ko'rinadi!
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="guide-step">
+                        <div class="step-num">3</div>
+                        <div class="step-body">
+                            <h4>Telefon kamerasini kompyuterga veb-kamera qilish:</h4>
+                            <p>
+                                Telefonda "Kamera rejimi"ni tanlab, telefoningizning orqa yuqori sifatli kamerasini kompyuteringiz uchun simsiz veb-kamera (Webcam) sifatida ishlata olasiz!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detected-screens-area">
+                    <h3>Aniqlangan Monitorlar:</h3>
+                    <div id="monitorsList" class="monitors-list">
+                        <!-- Populated by JS -->
+                    </div>
+                    <button class="btn btn-secondary btn-small" id="btnRefreshScreens">
+                        🔄 Monitorlarni Qayta Aniqlash
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>PhoneDisplay Pro © 2026 • Ikki Tomonlama WebRTC 60 FPS • Node.js, C#, JavaScript, HTML5/CSS3</p>
+        </footer>
+    </div>
+
+    <script src="/js/host.js"></script>
+</body>
+</html>
